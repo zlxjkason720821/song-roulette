@@ -1,0 +1,104 @@
+:root{
+  --night:#0e1419;
+  --room:#1d2731;
+  --ink:#dfe6ec;
+  --ink-dim:#7a96ab;
+  --ink-faint:#4a5f6e;
+  --lamp:#e8c98a;
+  --lamp-soft:rgba(232,201,138,.22);
+  --lamp-glow:rgba(232,201,138,.12);
+  --glass-cold:#7a96ab;
+  --line:rgba(122,150,171,.14);
+  --line-soft:rgba(122,150,171,.08);
+  --fog:rgba(223,230,236,.06);
+  --glass:rgba(29,39,49,.72);
+  --glass-border:rgba(122,150,171,.16);
+  --danger:#9a7a7a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--night);
+  color:var(--ink);
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-weight:200;
+  letter-spacing:.34em;
+}
+
+/* 雨窗氛围（控制台轻量版） */
+.rw-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.rw-cloud{position:absolute;border-radius:50%;filter:blur(60px);opacity:.35;
+  animation:cloudDrift 14s ease-in-out infinite}
+.rw-cloud.a{width:420px;height:180px;left:-80px;top:8%;
+  background:radial-gradient(ellipse,rgba(29,39,49,.9),transparent 70%)}
+.rw-cloud.b{width:380px;height:160px;right:-60px;top:42%;
+  background:radial-gradient(ellipse,rgba(20,30,40,.85),transparent 70%);animation-delay:-5s}
+.rw-cloud.c{width:340px;height:140px;left:28%;bottom:6%;
+  background:radial-gradient(ellipse,rgba(24,34,44,.8),transparent 70%);animation-delay:-9s}
+@keyframes cloudDrift{
+  0%,100%{transform:translate(0,0)}
+  50%{transform:translate(18px,-12px)}
+}
+.rw-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(115% 85% at 50% 35%,transparent 40%,rgba(8,12,16,.82) 100%)}
+
+.wrap{position:relative;z-index:2;max-width:800px;margin:0 auto}
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:18px;margin-bottom:24px;border-bottom:1px solid var(--line);
+  flex-wrap:wrap;gap:14px;
+}
+.brand .deco{
+  font-size:10px;letter-spacing:.5em;color:var(--ink-dim);
+  text-transform:uppercase;margin-bottom:6px;font-weight:200;
+}
+.brand h1{
+  font-size:22px;font-weight:200;letter-spacing:.38em;color:var(--ink);
+}
+.brand h1 b{color:var(--lamp);font-weight:200}
+.brand .sub{
+  font-size:11px;color:var(--ink-faint);letter-spacing:.36em;
+  margin-top:8px;line-height:1.8;font-weight:200;
+}
+.stats{display:flex;gap:20px;text-align:center}
+.stat{
+  padding:10px 18px;border:1px solid var(--line-soft);border-radius:4px;
+  background:rgba(29,39,49,.55);backdrop-filter:blur(8px);
+}
+.stat .num{
+  font-size:24px;font-weight:200;color:var(--lamp);line-height:1;
+  text-shadow:0 0 20px var(--lamp-glow);letter-spacing:.1em;
+}
+.stat .lbl{
+  font-size:10px;letter-spacing:.38em;color:var(--ink-dim);
+  margin-top:6px;font-weight:200;
+}
+
+.panel{
+  margin-bottom:20px;border:1px solid var(--glass-border);border-radius:6px;
+  background:var(--glass);backdrop-filter:blur(16px);
+  box-shadow:0 12px 40px rgba(0,0,0,.28),inset 0 1px 0 rgba(223,230,236,.04);
+}
+.panel-head{
+  display:flex;align-items:center;gap:12px;padding:16px 20px;
+  border-bottom:1px solid var(--line-soft);
+}
+.panel-icon{
+  width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;background:rgba(122,150,171,.08);border:1px solid var(--line);
+  color:var(--lamp);flex-shrink:0;
+}
+.panel-title{
+  font-size:11px;letter-spacing:.38em;color:var(--ink-dim);font-weight:200;
+}
+.panel-body{padding:20px}
+
+.site-copy{
+  position:relative;z-index:3;text-align:center;padding:20px 24px 8px;
+  font-size:9px;font-weight:200;letter-spacing:.38em;color:var(--ink-faint);opacity:.55;
+}
+.site-copy a{color:inherit;text-decoration:none}
+.site-copy a:hover{color:var(--ink-dim);opacity:.8}
+
+@media(prefers-reduced-motion:reduce){
+  .rw-cloud{animation:none}
+}

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>点歌盲盒 · 控制台</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  body{min-height:100vh;padding:28px 24px 40px}
+
+  .stage-link{
+    display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:7px 16px;
+    border:1px solid var(--line);border-radius:2px;font-size:11px;letter-spacing:.36em;
+    color:var(--ink-dim);text-decoration:none;transition:all .4s;
+    background:rgba(29,39,49,.45);font-weight:200;
+  }
+  .stage-link:hover{border-color:rgba(232,201,138,.3);color:var(--lamp);box-shadow:0 0 24px var(--lamp-glow)}
+  .stage-link .dot{
+    width:5px;height:5px;border-radius:50%;background:var(--lamp);
+    box-shadow:0 0 8px var(--lamp-soft);animation:lampBreathe 6s ease-in-out infinite;
+  }
+  @keyframes lampBreathe{0%,100%{opacity:.4}50%{opacity:1}}
+
+  .seg{
+    display:inline-flex;padding:3px;border:1px solid var(--line);border-radius:4px;
+    background:rgba(14,20,25,.5);margin-bottom:18px;
+  }
+  .seg button{
+    background:transparent;border:none;color:var(--ink-faint);cursor:pointer;
+    font-family:inherit;font-size:11px;font-weight:200;letter-spacing:.36em;
+    padding:9px 22px;border-radius:2px;transition:all .35s;
+  }
+  .seg button.on{color:var(--night);background:var(--lamp);box-shadow:0 0 20px var(--lamp-glow)}
+  .tab-pane{display:none}.tab-pane.on{display:block}
+
+  textarea{
+    width:100%;min-height:120px;background:rgba(14,20,25,.6);border:1px solid var(--line);
+    color:var(--ink);font-family:"SF Mono",Consolas,monospace;font-size:12px;font-weight:400;
+    line-height:1.8;letter-spacing:.06em;padding:14px 16px;border-radius:4px;
+    resize:vertical;outline:none;transition:border-color .35s,box-shadow .35s;
+  }
+  textarea:focus{border-color:rgba(232,201,138,.25);box-shadow:0 0 0 3px var(--lamp-glow)}
+  textarea::placeholder{color:var(--ink-faint)}
+  .hint{font-size:11px;color:var(--ink-faint);letter-spacing:.34em;margin:10px 0 16px;line-height:1.8;font-weight:200}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .act{
+    flex:1;min-width:120px;font-family:inherit;font-weight:200;cursor:pointer;
+    background:rgba(29,39,49,.5);color:var(--ink);border:1px solid var(--line);
+    padding:12px 16px;font-size:12px;letter-spacing:.36em;border-radius:4px;transition:all .35s;
+  }
+  .act:hover{border-color:rgba(232,201,138,.3);color:var(--lamp);box-shadow:0 0 20px var(--lamp-glow)}
+  .act.danger:hover{border-color:rgba(154,122,122,.4);color:var(--danger);box-shadow:0 0 16px rgba(154,122,122,.12)}
+  .file-lbl{
+    display:inline-flex;align-items:center;cursor:pointer;border:1px dashed var(--line);
+    padding:12px 20px;font-size:12px;font-weight:200;letter-spacing:.34em;
+    color:var(--ink-dim);border-radius:4px;transition:all .35s;
+  }
+  .file-lbl:hover{border-color:rgba(122,150,171,.35);color:var(--ink);background:rgba(122,150,171,.06)}
+  .file-lbl input{display:none}
+
+  .setting-row{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:16px;border:1px solid var(--line-soft);border-radius:4px;
+    background:rgba(14,20,25,.4);
+  }
+  .setting-label{font-size:11px;font-weight:200;letter-spacing:.36em;color:var(--ink-faint);min-width:44px}
+  .sound-toggle{
+    background:rgba(29,39,49,.6);border:1px solid var(--line);cursor:pointer;
+    width:44px;height:44px;border-radius:50%;font-size:17px;color:var(--ink-dim);
+    transition:all .35s;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .sound-toggle.on{
+    border-color:rgba(232,201,138,.35);color:var(--lamp);
+    box-shadow:0 0 20px var(--lamp-glow);background:rgba(232,201,138,.08);
+  }
+  .sound-toggle:not(.on){opacity:.4;filter:grayscale(.6)}
+  #soundSelect{
+    flex:1;min-width:160px;background:rgba(14,20,25,.6);border:1px solid var(--line);
+    color:var(--ink);font-family:inherit;font-size:12px;font-weight:200;letter-spacing:.34em;
+    padding:12px 14px;border-radius:4px;cursor:pointer;outline:none;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237a96ab'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;
+  }
+  #soundSelect:hover,#soundSelect:focus{border-color:rgba(232,201,138,.25)}
+  #soundSelect option{background:var(--room);color:var(--ink)}
+  .test-btn{
+    background:rgba(29,39,49,.5);border:1px solid var(--line);color:var(--ink-dim);cursor:pointer;
+    font-family:inherit;font-size:12px;font-weight:200;letter-spacing:.34em;
+    padding:12px 20px;border-radius:4px;transition:all .35s;
+  }
+  .test-btn:hover{border-color:rgba(232,201,138,.3);color:var(--lamp)}
+  .sync-note{
+    font-size:11px;font-weight:200;color:var(--glass-cold);letter-spacing:.34em;margin-top:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .sync-note::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--glass-cold);opacity:.6}
+
+  .lists{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:560px){.lists{grid-template-columns:1fr}}
+  .list-panel{border:1px solid var(--line-soft);border-radius:4px;overflow:hidden;background:rgba(14,20,25,.35)}
+  .list-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;border-bottom:1px solid var(--line-soft);background:rgba(29,39,49,.4);
+  }
+  .list-head h3{font-size:11px;font-weight:200;letter-spacing:.38em;color:var(--ink-dim)}
+  .badge{
+    font-size:11px;font-weight:200;letter-spacing:.2em;color:var(--lamp);padding:2px 10px;
+    border:1px solid var(--line);border-radius:2px;background:rgba(232,201,138,.06);
+  }
+  .scroll{max-height:240px;overflow-y:auto}
+  .scroll::-webkit-scrollbar{width:4px}
+  .scroll::-webkit-scrollbar-thumb{background:var(--ink-faint);border-radius:2px}
+  .item{
+    padding:10px 16px;font-size:12px;font-weight:200;letter-spacing:.2em;
+    border-bottom:1px solid var(--line-soft);
+    display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background .3s;
+  }
+  .item:last-child{border-bottom:none}
+  .item:hover{background:rgba(122,150,171,.05)}
+  .item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item .sub{color:var(--ink-faint);font-size:10px;letter-spacing:.15em;margin-left:4px}
+  .item.sung .nm{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:var(--ink-faint)}
+  .item button{
+    background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px;
+    padding:4px 6px;border-radius:2px;transition:all .3s;
+  }
+  .item button:hover{color:var(--danger);background:rgba(154,122,122,.08)}
+  .empty{padding:32px;text-align:center;color:var(--ink-faint);font-size:11px;letter-spacing:.38em;font-weight:200}
+</style>
+</head>
+<body>
+
+<div class="rw-bg">
+  <div class="rw-cloud a"></div><div class="rw-cloud b"></div><div class="rw-cloud c"></div>
+</div>
+<div class="rw-vignette"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="deco">rain window · control</div>
+      <h1>点歌盲盒 · <b>控制台</b></h1>
+      <a class="stage-link" href="stage_display.html" target="_blank">
+        <span class="dot"></span>打开雨窗舞台
+      </a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num" id="poolCount">0</div><div class="lbl">待抽</div></div>
+      <div class="stat"><div class="num" id="sungCount">0</div><div class="lbl">已唱</div></div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-icon">◇</div>
+      <div class="panel-title">导入歌单</div>
+    </div>
+    <div class="panel-body">
+      <div class="seg">
+        <button class="on" data-tab="text">纯文本</button>
+        <button data-tab="csv">CSV</button>
+      </div>
+      <div class="tab-pane on" id="pane-text">
+        <textarea id="textInput" placeholder="一行一首&#10;虫儿飞&#10;晴天&#10;后来&#10;天空之城"></textarea>
+        <div class="hint">每行一首歌名，空行自动忽略。</div>
+        <div class="row">
+          <button class="act" id="importText">导入到池子</button>
+          <label class="file-lbl">读取 .txt<input type="file" id="txtFile" accept=".txt,.text"></label>
+        </div>
+      </div>
+      <div class="tab-pane" id="pane-csv">
+        <textarea id="csvInput" placeholder="歌名,歌手,备注&#10;虫儿飞,郑伊健,降调&#10;晴天,周杰伦,&#10;后来,刘若英,粉丝点过"></textarea>
+        <div class="hint">第一行可为表头，第一列为歌名，后两列可选。</div>
+        <div class="row">
+          <button class="act" id="importCsv">导入到池子</button>
+          <label class="file-lbl">读取 .csv<input type="file" id="csvFile" accept=".csv,.tsv,.txt"></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-icon">◈</div>
+      <div class="panel-title">抽中音色</div>
+    </div>
+    <div class="panel-body">
+      <div class="setting-row">
+        <span class="setting-label">开关</span>
+        <button class="sound-toggle on" id="soundToggle" title="开关音效">🔔</button>
+        <span class="setting-label">音色</span>
+        <select id="soundSelect">
+          <option value="celestial">空灵 · 星音</option>
+          <option value="crystal">水晶</option>
+          <option value="windchime">风铃</option>
+          <option value="bowl">颂钵</option>
+          <option value="bell">清脆铃</option>
+        </select>
+        <button class="test-btn" id="testSound">试听</button>
+      </div>
+      <div class="sync-note">音色同步至雨窗舞台 · 抽中时由舞台页发声</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-icon">◎</div>
+      <div class="panel-title">歌单管理</div>
+    </div>
+    <div class="panel-body">
+      <div class="row" style="margin-bottom:18px">
+        <button class="act" id="resetSung">把已唱全部放回</button>
+        <button class="act danger" id="clearAll">清空全部</button>
+      </div>
+      <div class="lists">
+        <div class="list-panel">
+          <div class="list-head"><h3>待抽</h3><span class="badge" id="poolLbl">0</span></div>
+          <div class="scroll" id="poolList"><div class="empty">暂无歌曲</div></div>
+        </div>
+        <div class="list-panel">
+          <div class="list-head"><h3>已唱</h3><span class="badge" id="sungLbl">0</span></div>
+          <div class="scroll" id="sungList"><div class="empty">暂无记录</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer class="site-copy">© 2026 <a href="https://github.com/zlxjkason" target="_blank" rel="noopener">zlxjkason</a> · 点歌盲盒</footer>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const { STORE_KEY, SOUND_KEY, uid, esc, fmtSub, loadPool, savePool, loadSound, saveSound, playSound, parseText, parseCsv } = SongRoulette;
+let pool = [], sung = [], soundOn = true, _soundType = "celestial";
+const $ = s => document.querySelector(s);
+
+function loadData() {
+  const p = loadPool(); pool = p.pool; sung = p.sung;
+  const s = loadSound(); soundOn = s.soundOn; _soundType = s.type;
+}
+function render() {
+  $("#poolCount").textContent = pool.length;
+  $("#sungCount").textContent = sung.length;
+  $("#poolLbl").textContent = pool.length;
+  $("#sungLbl").textContent = sung.length;
+  renderList("#poolList", pool, false);
+  renderList("#sungList", sung, true);
+  savePool(pool, sung);
+}
+function renderList(sel, arr, isSung) {
+  const box = $(sel);
+  if (!arr.length) { box.innerHTML = `<div class="empty">${isSung ? "暂无记录" : "暂无歌曲"}</div>`; return; }
+  box.innerHTML = "";
+  arr.forEach(s => {
+    const d = document.createElement("div");
+    d.className = "item" + (isSung ? " sung" : "");
+    const sub = fmtSub(s);
+    d.innerHTML = `<span class="nm">${esc(s.name)}${sub ? ` <span class="sub">${esc(sub)}</span>` : ""}</span>`;
+    const btn = document.createElement("button");
+    btn.textContent = isSung ? "↺" : "✕";
+    btn.title = isSung ? "放回待抽" : "删除";
+    btn.onclick = () => {
+      if (isSung) { sung = sung.filter(x => x.id !== s.id); pool.push(s); }
+      else pool = pool.filter(x => x.id !== s.id);
+      render();
+    };
+    d.appendChild(btn); box.appendChild(d);
+  });
+}
+function addSongs(songs) {
+  const exist = new Set([...pool, ...sung].map(s => s.name.toLowerCase()));
+  let added = 0;
+  songs.forEach(s => {
+    if (!s.name) return;
+    const k = s.name.toLowerCase();
+    if (exist.has(k)) return;
+    exist.add(k);
+    pool.push({ id: uid(), name: s.name, singer: s.singer || "", note: s.note || "" });
+    added++;
+  });
+  render(); return added;
+}
+function flash(btn, txt) { const old = btn.textContent; btn.textContent = txt; setTimeout(() => btn.textContent = old, 1100); }
+function preview() { playSound(_soundType); }
+
+$("#importText").onclick = () => { const n = addSongs(parseText($("#textInput").value)); flash($("#importText"), `+${n} 首`); };
+$("#importCsv").onclick = () => { const n = addSongs(parseCsv($("#csvInput").value)); flash($("#importCsv"), `+${n} 首`); };
+$("#txtFile").onchange = e => readFile(e, "#textInput", "#importText");
+$("#csvFile").onchange = e => readFile(e, "#csvInput", "#importCsv");
+function readFile(e, ta, btn) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { $(ta).value = r.result; $(btn).click(); };
+  r.readAsText(f, "utf-8"); e.target.value = "";
+}
+$("#resetSung").onclick = () => { pool = pool.concat(sung); sung = []; render(); };
+$("#clearAll").onclick = () => { if (confirm("清空全部歌单？此操作不可撤销。")) { pool = []; sung = []; render(); } };
+$("#soundToggle").onclick = () => {
+  soundOn = !soundOn;
+  $("#soundToggle").classList.toggle("on", soundOn);
+  $("#soundToggle").textContent = soundOn ? "🔔" : "🔕";
+  saveSound(soundOn, _soundType);
+  if (soundOn) preview();
+};
+$("#soundSelect").onchange = e => {
+  _soundType = e.target.value;
+  if (!soundOn) { soundOn = true; $("#soundToggle").classList.add("on"); $("#soundToggle").textContent = "🔔"; }
+  saveSound(soundOn, _soundType); preview();
+};
+$("#testSound").onclick = preview;
+
+document.querySelectorAll(".seg button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll(".seg button").forEach(x => x.classList.remove("on"));
+    document.querySelectorAll(".tab-pane").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); $("#pane-" + b.dataset.tab).classList.add("on");
+  };
+});
+
+function syncFromStorage(d) {
+  pool = d.pool || []; sung = d.sung || [];
+  $("#poolCount").textContent = pool.length; $("#sungCount").textContent = sung.length;
+  $("#poolLbl").textContent = pool.length; $("#sungLbl").textContent = sung.length;
+  renderList("#poolList", pool, false); renderList("#sungList", sung, true);
+}
+window.addEventListener("storage", e => {
+  if (e.key === STORE_KEY) { try { syncFromStorage(JSON.parse(e.newValue)); } catch (_) {} }
+});
+setInterval(() => {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (d) {
+      const np = (d.pool || []).length, ns = (d.sung || []).length;
+      if (np !== pool.length || ns !== sung.length) syncFromStorage(d);
+    }
+  } catch (_) {}
+}, 1500);
+
+loadData();
+$("#soundToggle").classList.toggle("on", soundOn);
+$("#soundToggle").textContent = soundOn ? "🔔" : "🔕";
+$("#soundSelect").value = _soundType;
+render();
+</script>
+</body>
+</html>
